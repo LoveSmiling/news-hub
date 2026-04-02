@@ -1,0 +1,8 @@
+frontend
+data
+.git
+__pycache__
+*.pyc
+.env
+tests
+openspec

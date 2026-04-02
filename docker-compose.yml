@@ -1,0 +1,52 @@
+services:
+  app:
+    build: .
+    container_name: newshub-app
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-newshub}:${POSTGRES_PASSWORD:-newshub123}@db:5432/${POSTGRES_DB:-newshub}
+      - RSSHUB_URL=http://rsshub:1200
+    volumes:
+      - ./app:/app/app
+
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: newshub-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-newshub}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-newshub123}
+      - POSTGRES_DB=${POSTGRES_DB:-newshub}
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-newshub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rsshub:
+    image: diygod/rsshub:chromium-bundled
+    container_name: newshub-rsshub
+    restart: unless-stopped
+    ports:
+      - "1200:1200"
+    environment:
+      - NODE_ENV=production
+      - CACHE_TYPE=memory
+
+  frontend:
+    build: ./frontend
+    container_name: newshub-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - app

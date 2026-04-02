@@ -1,0 +1,174 @@
+sources:
+  # ═══ 综合 ═══
+  - name: v2ex
+    display_name: V2EX 热门
+    category: 综合
+    type: rsshub
+    route: /v2ex/topics/hot
+    schedule: "*/10 * * * *"
+    max_items: 30
+
+  - name: coolapk
+    display_name: 酷安热榜
+    category: 综合
+    type: rsshub
+    route: /coolapk/hot
+    schedule: "*/10 * * * *"
+    max_items: 30
+
+  - name: cls
+    display_name: 财联社电报
+    category: 综合
+    type: rsshub
+    route: /cls/telegraph
+    schedule: "*/5 * * * *"
+    max_items: 30
+
+  # ═══ 娱乐 ═══
+  - name: bilibili
+    display_name: B站热门
+    category: 娱乐
+    type: rsshub
+    route: /bilibili/popular/all
+    schedule: "*/10 * * * *"
+    max_items: 30
+
+  - name: douban-movie
+    display_name: 豆瓣电影
+    category: 娱乐
+    type: rsshub
+    route: /douban/movie/playing
+    schedule: "*/30 * * * *"
+    max_items: 20
+
+  # ═══ 新闻 ═══
+  - name: thepaper
+    display_name: 澎湃新闻
+    category: 新闻
+    type: rsshub
+    route: /thepaper/featured
+    schedule: "*/10 * * * *"
+    max_items: 30
+
+  - name: zaobao
+    display_name: 联合早报
+    category: 新闻
+    type: rsshub
+    route: /zaobao/realtime/china
+    schedule: "*/15 * * * *"
+    max_items: 25
+
+  - name: ithome
+    display_name: IT之家
+    category: 新闻
+    type: rsshub
+    route: /ithome/tag/Win11
+    schedule: "*/15 * * * *"
+    max_items: 25
+
+  # ═══ 科技 ═══
+  - name: 36kr
+    display_name: 36氪快讯
+    category: 科技
+    type: rsshub
+    route: /36kr/newsflashes
+    schedule: "*/10 * * * *"
+    max_items: 30
+
+  - name: sspai
+    display_name: 少数派
+    category: 科技
+    type: rsshub
+    route: /sspai/matrix
+    schedule: "*/15 * * * *"
+    max_items: 20
+
+  - name: hackernews
+    display_name: HackerNews
+    category: 科技
+    type: rsshub
+    route: /hackernews/best
+    schedule: "*/15 * * * *"
+    max_items: 30
+
+  # ═══ 新增 RSSHub 源 ═══
+  - name: wallstreetcn
+    display_name: 华尔街见闻
+    category: 新闻
+    type: rsshub
+    route: /wallstreetcn/news/global
+    schedule: "*/10 * * * *"
+    max_items: 30
+
+  - name: bbc-chinese
+    display_name: BBC中文
+    category: 新闻
+    type: rsshub
+    route: /bbc/chinese
+    schedule: "*/15 * * * *"
+    max_items: 25
+
+  - name: readhub
+    display_name: Readhub
+    category: 科技
+    type: rsshub
+    route: /readhub/topic
+    schedule: "*/15 * * * *"
+    max_items: 25
+
+  - name: huxiu
+    display_name: 虎嗅
+    category: 科技
+    type: rsshub
+    route: /huxiu/article
+    schedule: "*/15 * * * *"
+    max_items: 25
+
+  - name: cnbeta
+    display_name: cnBeta
+    category: 科技
+    type: rsshub
+    route: /cnbeta
+    schedule: "*/15 * * * *"
+    max_items: 25
+
+  - name: solidot
+    display_name: Solidot
+    category: 科技
+    type: rsshub
+    route: /solidot/www
+    schedule: "*/30 * * * *"
+    max_items: 20
+
+  - name: guokr
+    display_name: 果壳
+    category: 科技
+    type: rsshub
+    route: /guokr/scientific
+    schedule: "*/30 * * * *"
+    max_items: 20
+
+  - name: jandan
+    display_name: 煎蛋
+    category: 娱乐
+    type: rsshub
+    route: /jandan/top
+    schedule: "*/30 * * * *"
+    max_items: 20
+
+  # ═══ 外部 RSS 源 ═══
+  - name: ruanyifeng
+    display_name: 阮一峰的博客
+    category: 科技
+    type: rss
+    url: https://www.ruanyifeng.com/blog/atom.xml
+    schedule: "0 * * * *"
+    max_items: 10
+
+  - name: infoq-cn
+    display_name: InfoQ中文
+    category: 科技
+    type: rss
+    url: https://www.infoq.cn/feed
+    schedule: "*/30 * * * *"
+    max_items: 20

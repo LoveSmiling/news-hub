@@ -1,0 +1,31 @@
+# Web framework
+fastapi==0.115.*
+uvicorn[standard]==0.34.*
+
+# Database
+sqlalchemy[asyncio]==2.0.*
+psycopg2-binary==2.9.*
+asyncpg==0.30.*
+alembic==1.14.*
+
+# Configuration
+pydantic-settings==2.7.*
+
+# HTTP client
+httpx==0.28.*
+
+# RSS parsing
+feedparser==6.0.*
+
+# Scheduling
+apscheduler==3.10.*
+
+# YAML
+pyyaml==6.0.*
+
+# AI / LLM
+openai==1.60.*
+pgvector==0.3.*
+
+# HTML parsing
+beautifulsoup4==4.12.*
