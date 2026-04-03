@@ -1,0 +1,31 @@
+# 生产部署覆盖文件
+# 用法: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#
+# 需要在项目根目录创建 .env 文件:
+#   POSTGRES_USER=newshub
+#   POSTGRES_PASSWORD=<强密码>
+#   POSTGRES_DB=newshub
+#   FRONTEND_PORT=9080
+
+services:
+  app:
+    build: .
+    volumes: []  # 不挂载源码，使用镜像内代码
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-newshub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-newshub}
+      - RSSHUB_URL=http://rsshub:1200
+
+  db:
+    ports: []  # 不对外暴露数据库端口
+    volumes:
+      - newshub-pgdata:/var/lib/postgresql/data
+
+  rsshub:
+    ports: []  # 不对外暴露 RSSHub 端口
+
+  frontend:
+    ports:
+      - "${FRONTEND_PORT:-9080}:80"
+
+volumes:
+  newshub-pgdata:
