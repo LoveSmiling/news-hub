@@ -281,26 +281,25 @@ onMounted(() => {
 <style scoped>
 .chat-container {
   display: flex;
-  position: fixed;
-  top: 56px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 10;
+  min-height: calc(100vh - 160px);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--admin-surface) 92%, transparent);
 }
 
 .chat-sidebar {
   width: 280px;
   min-width: 280px;
-  border-right: 1px solid rgba(128, 128, 128, 0.2);
+  border-right: 1px solid var(--admin-border);
   display: flex;
   flex-direction: column;
-  background: inherit;
+  background: color-mix(in srgb, var(--admin-surface) 96%, transparent);
 }
 
 .sidebar-header {
   padding: 16px;
-  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+  border-bottom: 1px solid var(--admin-border);
 }
 
 .session-list {
@@ -367,7 +366,7 @@ onMounted(() => {
 .messages-area {
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 18px;
 }
 
 .message-row {
@@ -392,13 +391,13 @@ onMounted(() => {
 }
 
 .message-bubble.user {
-  background: #18a058;
+  background: linear-gradient(135deg, #1fa96a, #178f6a);
   color: #fff;
   border-bottom-right-radius: 4px;
 }
 
 .message-bubble.assistant {
-  background: rgba(128, 128, 128, 0.15);
+  background: color-mix(in srgb, var(--admin-text-muted) 20%, transparent);
   border-bottom-left-radius: 4px;
 }
 
@@ -411,7 +410,7 @@ onMounted(() => {
 }
 
 .md-content :deep(pre) {
-  background: rgba(128, 128, 128, 0.15);
+  background: color-mix(in srgb, var(--admin-text-muted) 22%, transparent);
   padding: 12px;
   border-radius: 6px;
   overflow-x: auto;
@@ -439,8 +438,8 @@ onMounted(() => {
 
 /* Input area */
 .input-area {
-  padding: 16px 24px;
-  border-top: 1px solid rgba(128, 128, 128, 0.2);
+  padding: 14px 16px;
+  border-top: 1px solid var(--admin-border);
   display: flex;
   gap: 12px;
   align-items: flex-end;
@@ -460,5 +459,18 @@ onMounted(() => {
 
 .plain-content {
   white-space: pre-wrap;
+}
+
+@media (max-width: 900px) {
+  .chat-container {
+    flex-direction: column;
+    min-height: auto;
+  }
+
+  .chat-sidebar {
+    width: 100%;
+    min-width: 0;
+    max-height: 220px;
+  }
 }
 </style>

@@ -107,15 +107,21 @@ onMounted(async () => {
 <style scoped>
 .share-page {
   min-height: 100vh;
-  background: #fafafa;
-  color: #1a1a1a;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background:
+    radial-gradient(780px 360px at 50% -8%, rgba(241, 77, 66, 0.12), transparent 58%),
+    var(--front-bg);
+  color: var(--front-text);
+  font-family: var(--app-font);
 }
 
 .share-container {
   max-width: 720px;
   margin: 0 auto;
   padding: 48px 24px 64px;
+  background: color-mix(in srgb, var(--front-surface) 88%, transparent);
+  border: 1px solid var(--front-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--front-shadow);
 }
 
 /* Loading */
@@ -175,36 +181,36 @@ onMounted(async () => {
   font-weight: 700;
   margin: 0 0 12px;
   line-height: 1.4;
-  color: #111;
+  color: var(--front-text);
 }
 .share-meta {
   font-size: 14px;
-  color: #888;
+  color: var(--front-text-muted);
   margin-bottom: 24px;
 }
 .share-header hr {
   border: none;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--front-border);
 }
 
 /* Content */
 .share-content {
   font-size: 16px;
-  color: #333;
+  color: var(--front-text);
 }
 .share-content :deep(h2) {
   font-size: 20px;
   font-weight: 600;
   margin: 32px 0 16px;
-  color: #111;
-  border-bottom: 1px solid #eee;
+  color: var(--front-text);
+  border-bottom: 1px solid var(--front-border);
   padding-bottom: 8px;
 }
 .share-content :deep(h3) {
   font-size: 17px;
   font-weight: 600;
   margin: 24px 0 12px;
-  color: #222;
+  color: var(--front-text);
 }
 .share-content :deep(p) {
   margin: 12px 0;
@@ -218,10 +224,10 @@ onMounted(async () => {
   margin: 6px 0;
 }
 .share-content :deep(blockquote) {
-  border-left: 3px solid #ddd;
+  border-left: 3px solid var(--front-border);
   padding-left: 16px;
   margin: 16px 0;
-  color: #666;
+  color: var(--front-text-muted);
 }
 
 /* References */
@@ -230,14 +236,14 @@ onMounted(async () => {
 }
 .share-references hr {
   border: none;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--front-border);
   margin-bottom: 24px;
 }
 .share-references h2 {
   font-size: 18px;
   font-weight: 600;
   margin: 0 0 16px;
-  color: #111;
+  color: var(--front-text);
 }
 .share-references ol {
   padding-left: 24px;
@@ -248,14 +254,14 @@ onMounted(async () => {
   line-height: 1.6;
 }
 .share-references a {
-  color: #1a73e8;
+  color: color-mix(in srgb, var(--front-accent) 82%, #1576e8);
   text-decoration: none;
 }
 .share-references a:hover {
   text-decoration: underline;
 }
 .ref-source {
-  color: #999;
+  color: var(--front-text-muted);
   font-size: 13px;
 }
 
@@ -265,13 +271,13 @@ onMounted(async () => {
 }
 .share-footer hr {
   border: none;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--front-border);
   margin-bottom: 24px;
 }
 .footer-brand {
   text-align: center;
   font-size: 14px;
-  color: #999;
+  color: var(--front-text-muted);
 }
 .footer-icon {
   font-size: 16px;
@@ -280,11 +286,21 @@ onMounted(async () => {
   margin: 0 8px;
 }
 .brand-link {
-  color: #1a73e8;
+  color: color-mix(in srgb, var(--front-accent) 82%, #1576e8);
   text-decoration: none;
   font-weight: 500;
 }
 .brand-link:hover {
   text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .share-container {
+    padding: 24px 14px 32px;
+  }
+
+  .share-header h1 {
+    font-size: 22px;
+  }
 }
 </style>

@@ -1,41 +1,46 @@
 <template>
-  <n-card :title="displayName" size="small" hoverable class="hot-card">
+  <n-card :title="displayName" size="small" hoverable class="hot-card" :bordered="false">
     <template #header-extra>
-      <n-tag :type="categoryType" size="small" round>{{ category || '综合' }}</n-tag>
-    </template>
-    <div class="hot-list">
-      <div
-        v-for="(item, index) in items"
-        :key="item.id"
-        class="hot-item-wrapper"
-      >
-        <div class="hot-item" @click="toggleExpand(item.id)">
-          <span class="hot-rank" :class="rankClass(index)">{{ index + 1 }}</span>
-          <span class="hot-title" :title="item.title">{{ item.title }}</span>
-          <span v-if="item.hot_value" class="hot-value">{{ item.hot_value }}</span>
-        </div>
-        <!-- Expanded detail -->
-        <div v-if="expandedId === item.id" class="hot-detail">
-          <div v-if="item.keywords && item.keywords.length" class="hot-keywords">
-            <n-tag v-for="kw in item.keywords" :key="kw" size="tiny" round type="info" style="margin: 0 4px 4px 0">{{ kw }}</n-tag>
-          </div>
-          <div v-if="item.summary" class="hot-summary">{{ item.summary }}</div>
-          <div v-else class="hot-summary-actions">
-            <n-button
-              size="tiny"
-              type="primary"
-              :loading="loadingId === item.id"
-              @click.stop="handleGenerateSummary(item)"
-            >
-              生成摘要
-            </n-button>
-          </div>
-          <div class="hot-link">
-            <n-button text size="tiny" type="info" @click.stop="openLink(item.url, item.id)">查看原文 →</n-button>
-          </div>
-        </div>
+      <div class="header-extra-wrap">
+        <span class="drag-handle" title="拖拽排序">⋮⋮</span>
+        <n-tag :type="categoryType" size="small" round>{{ category || '综合' }}</n-tag>
       </div>
-      <n-empty v-if="items.length === 0" description="暂无数据" size="small" />
+    </template>
+    <div ref="scrollRef" class="hot-list-scroll">
+      <div class="hot-list">
+        <div
+          v-for="(item, index) in items"
+          :key="item.id"
+          class="hot-item-wrapper"
+        >
+          <div class="hot-item" @click="toggleExpand(item.id)">
+            <span class="hot-rank" :class="rankClass(index)">{{ index + 1 }}</span>
+            <span class="hot-title" :title="item.title">{{ item.title }}</span>
+            <span v-if="item.hot_value" class="hot-value">{{ item.hot_value }}</span>
+          </div>
+          <!-- Expanded detail -->
+          <div v-if="expandedId === item.id" class="hot-detail">
+            <div v-if="item.keywords && item.keywords.length" class="hot-keywords">
+              <n-tag v-for="kw in item.keywords" :key="kw" size="tiny" round type="info" style="margin: 0 4px 4px 0">{{ kw }}</n-tag>
+            </div>
+            <div v-if="item.summary" class="hot-summary">{{ item.summary }}</div>
+            <div v-else class="hot-summary-actions">
+              <n-button
+                size="tiny"
+                type="primary"
+                :loading="loadingId === item.id"
+                @click.stop="handleGenerateSummary(item)"
+              >
+                生成摘要
+              </n-button>
+            </div>
+            <div class="hot-link">
+              <n-button text size="tiny" type="info" @click.stop="openLink(item.url, item.id)">查看原文 →</n-button>
+            </div>
+          </div>
+        </div>
+        <n-empty v-if="items.length === 0" description="暂无数据" size="small" />
+      </div>
     </div>
     <template #action>
       <div class="card-footer">
@@ -48,8 +53,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { NCard, NTag, NEmpty, NText, NButton } from 'naive-ui'
+import { useOverlayScrollbars } from 'overlayscrollbars-vue'
 import type { HotItem } from '../api'
 import { generateSummary } from '../api'
 import { usePreferenceStore } from '../stores/preference'
@@ -64,6 +70,18 @@ const props = defineProps<{
 const prefStore = usePreferenceStore()
 const expandedId = ref<number | null>(null)
 const loadingId = ref<number | null>(null)
+const scrollRef = ref<HTMLElement | null>(null)
+
+const [initScrollbar] = useOverlayScrollbars({
+  options: { scrollbars: { autoHide: 'scroll' } },
+  defer: true,
+})
+
+onMounted(() => {
+  if (scrollRef.value) {
+    initScrollbar({ target: scrollRef.value })
+  }
+})
 
 function toggleExpand(id: number) {
   expandedId.value = expandedId.value === id ? null : id
@@ -119,15 +137,48 @@ function openLink(url: string, itemId?: number) {
 
 <style scoped>
 .hot-card {
-  height: 100%;
+  height: 420px;
   min-width: 0;
   overflow: hidden;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--front-border);
+  background: color-mix(in srgb, var(--front-surface-strong) 88%, transparent);
+  box-shadow: var(--front-shadow);
+}
+
+.hot-list-scroll {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.header-extra-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: var(--front-text-muted);
+  font-size: 14px;
+  letter-spacing: 2px;
+  opacity: 0.4;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
 }
 
 .hot-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .hot-item-wrapper {
@@ -138,14 +189,15 @@ function openLink(url: string, itemId?: number) {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 4px;
-  border-radius: 4px;
+  padding: 8px 6px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .hot-item:hover {
-  background-color: var(--n-color-hover, rgba(0, 0, 0, 0.04));
+  background-color: color-mix(in srgb, var(--front-accent) 8%, transparent);
+  transform: translateY(-1px);
 }
 
 .hot-rank {
@@ -156,7 +208,7 @@ function openLink(url: string, itemId?: number) {
   font-size: 12px;
   font-weight: 700;
   border-radius: 4px;
-  color: var(--n-text-color-3, #999);
+  color: var(--front-text-muted);
   flex-shrink: 0;
 }
 
@@ -178,6 +230,7 @@ function openLink(url: string, itemId?: number) {
 .hot-title {
   flex: 1;
   font-size: 14px;
+  line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -185,7 +238,7 @@ function openLink(url: string, itemId?: number) {
 
 .hot-value {
   font-size: 12px;
-  color: var(--n-text-color-3, #999);
+  color: var(--front-text-muted);
   flex-shrink: 0;
 }
 
@@ -195,7 +248,7 @@ function openLink(url: string, itemId?: number) {
 }
 
 .hot-detail {
-  padding: 4px 4px 8px 32px;
+  padding: 4px 8px 10px 34px;
   font-size: 13px;
 }
 
@@ -204,7 +257,7 @@ function openLink(url: string, itemId?: number) {
 }
 
 .hot-summary {
-  color: var(--n-text-color-2, #666);
+  color: var(--front-text-muted);
   line-height: 1.5;
   margin-bottom: 4px;
 }

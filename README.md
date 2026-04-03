@@ -35,6 +35,21 @@ NewsHub 是一个基于 AI 的智能新闻聚合与分析平台，自动从 20+ 
 - **图表**: ECharts / vue-echarts
 - **路由**: Vue Router
 
+## 🎨 前端页面分层
+
+前端采用双壳结构，将内容阅读与后台工具明确分离：
+
+- **前台阅读壳**：`/`、`/search`、`/history`、`/trends`、`/recommend`、`/share/:token`
+- **后台工具壳**：`/chat`、`/briefings`、`/knowledge-base`、`/sources`、`/logs`、`/settings`
+
+路由通过 `meta.layout` 指定页面归属：
+
+- `front`：前台阅读壳
+- `admin`：后台工具壳
+- `minimal`：最小壳（仅渲染页面）
+
+全局设计令牌与主题变量位于 `frontend/src/styles/theme.css`，用于统一前后台的色板、圆角、间距和状态反馈。
+
 ### 基础设施
 - **容器化**: Docker + Docker Compose
 - **反向代理**: Nginx

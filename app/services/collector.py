@@ -1,3 +1,5 @@
+import importlib
+import inspect
 import logging
 from datetime import datetime, timezone
 from pathlib import Path
@@ -47,7 +49,35 @@ def create_spider(config: SourceConfig, rsshub_url: str):
     """Create the appropriate spider based on source type."""
     if config.type in ("rsshub", "rss"):
         return RSSSpider(config, rsshub_url)
+    if config.type == "custom":
+        return _load_custom_spider(config, rsshub_url)
     raise ValueError(f"Unknown spider type: {config.type}")
+
+
+def _load_custom_spider(config: SourceConfig, rsshub_url: str):
+    """Dynamically load a custom spider by source name convention."""
+    module_path = f"app.spiders.custom.{config.name}_spider"
+    try:
+        module = importlib.import_module(module_path)
+    except ModuleNotFoundError:
+        raise ValueError(
+            f"Custom spider module not found: {module_path}. "
+            f"Create app/spiders/custom/{config.name}_spider.py"
+        )
+
+    from app.spiders.base import BaseSpider
+    spider_class = None
+    for _, obj in inspect.getmembers(module, inspect.isclass):
+        if issubclass(obj, BaseSpider) and obj is not BaseSpider:
+            spider_class = obj
+            break
+
+    if spider_class is None:
+        raise ValueError(
+            f"No BaseSpider subclass found in {module_path}"
+        )
+
+    return spider_class(config, rsshub_url)
 
 
 async def collect_source(source_name: str) -> int:

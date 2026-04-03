@@ -1,5 +1,10 @@
 <template>
   <div class="history-view">
+    <section class="history-hero">
+      <h2>历史热榜回看</h2>
+      <p>按来源与日期回溯热点内容，追踪话题的传播轨迹。</p>
+    </section>
+
     <div class="history-controls">
       <n-space align="center">
         <n-select
@@ -156,12 +161,31 @@ onMounted(async () => {
 
 <style scoped>
 .history-view {
-  max-width: 800px;
+  max-width: 920px;
   margin: 0 auto;
 }
 
+.history-hero {
+  border: 1px solid var(--front-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--front-surface) 90%, transparent);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.history-hero h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.history-hero p {
+  margin: 6px 0 0;
+  color: var(--front-text-muted);
+  font-size: 13px;
+}
+
 .history-controls {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .history-info {
@@ -173,21 +197,24 @@ onMounted(async () => {
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .history-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  border: 1px solid var(--front-border);
+  background: color-mix(in srgb, var(--front-surface) 92%, transparent);
 }
 
 .history-item:hover {
-  background-color: var(--n-color-hover, rgba(255, 255, 255, 0.04));
+  background-color: color-mix(in srgb, var(--front-accent) 8%, transparent);
+  transform: translateY(-1px);
 }
 
 .item-rank {
@@ -198,7 +225,7 @@ onMounted(async () => {
   font-size: 12px;
   font-weight: 700;
   border-radius: 4px;
-  color: var(--n-text-color-3, #999);
+  color: var(--front-text-muted);
   flex-shrink: 0;
 }
 
@@ -216,7 +243,7 @@ onMounted(async () => {
 
 .item-hot {
   font-size: 12px;
-  color: var(--n-text-color-3, #999);
+  color: var(--front-text-muted);
   flex-shrink: 0;
 }
 

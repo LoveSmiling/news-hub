@@ -1,5 +1,10 @@
 <template>
   <div class="search-view">
+    <section class="search-hero">
+      <h2>搜索你关心的话题</h2>
+      <p>支持来源、分类与时间范围筛选，快速定位热点演化线索。</p>
+    </section>
+
     <div class="search-bar">
       <n-input-group>
         <n-input
@@ -199,8 +204,27 @@ onMounted(async () => {
 
 <style scoped>
 .search-view {
-  max-width: 800px;
+  max-width: 920px;
   margin: 0 auto;
+}
+
+.search-hero {
+  border: 1px solid var(--front-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--front-surface) 92%, transparent);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.search-hero h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.search-hero p {
+  margin: 6px 0 0;
+  color: var(--front-text-muted);
+  font-size: 13px;
 }
 
 .search-bar {
@@ -220,19 +244,21 @@ onMounted(async () => {
 .result-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .result-item {
-  padding: 12px 16px;
-  border-radius: 8px;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: background-color 0.2s;
-  border: 1px solid var(--n-border-color, rgba(255, 255, 255, 0.09));
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  border: 1px solid var(--front-border);
+  background: color-mix(in srgb, var(--front-surface) 90%, transparent);
 }
 
 .result-item:hover {
-  background-color: var(--n-color-hover, rgba(255, 255, 255, 0.04));
+  background-color: color-mix(in srgb, var(--front-accent) 8%, transparent);
+  transform: translateY(-1px);
 }
 
 .result-header {

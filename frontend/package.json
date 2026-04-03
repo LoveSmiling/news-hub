@@ -17,11 +17,14 @@
     "@vicons/ionicons5": "^0.13.0",
     "axios": "^1.7.9",
     "echarts": "^5.5.0",
+    "markdown-it": "^14.1.0",
     "naive-ui": "^2.44.1",
+    "overlayscrollbars": "^2.14.0",
+    "overlayscrollbars-vue": "^0.5.9",
     "pinia": "^3.0.4",
     "vue": "^3.5.31",
     "vue-echarts": "^7.0.0",
     "vue-router": "^5.0.4",
-    "markdown-it": "^14.1.0"
+    "vuedraggable": "^4.1.0"
   }
 }

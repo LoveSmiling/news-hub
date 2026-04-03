@@ -133,6 +133,7 @@
             <div v-if="detailData.status === 'done'" style="margin-top: 16px">
               <n-divider />
               <n-space :size="12">
+                <n-button size="small" type="info" @click="openReadingMode">📖 阅读模式</n-button>
                 <n-button size="small" @click="openShareDialog">📤 分享</n-button>
                 <n-button size="small" @click="handleExportMarkdown">📥 导出 Markdown</n-button>
               </n-space>
@@ -188,6 +189,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   NH2, NH4,
   NSpace, NCard, NButton, NSelect, NInput, NInputNumber, NInputGroup,
@@ -201,6 +203,7 @@ import MarkdownIt from 'markdown-it'
 import { fetchSources, createShare, deleteShare } from '../api'
 
 const message = useMessage()
+const router = useRouter()
 const md = new MarkdownIt()
 
 // ── Sources (dynamic from API) ──
@@ -429,6 +432,15 @@ function copyShareLink() {
   message.success('链接已复制')
 }
 
+function openReadingMode() {
+  if (!detailData.value) return
+  if (!detailData.value.share_token || isShareExpired(detailData.value)) {
+    message.warning('请先生成有效分享链接，再进入阅读模式')
+    return
+  }
+  router.push(`/share/${detailData.value.share_token}`)
+}
+
 // ── Export Markdown ──
 function handleExportMarkdown() {
   if (!detailData.value) return
@@ -470,18 +482,22 @@ onUnmounted(() => {
 
 <style scoped>
 .markdown-body {
-  line-height: 1.7;
-  font-size: 14px;
+  line-height: 1.85;
+  font-size: 15px;
+  border: 1px solid var(--front-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--front-surface) 88%, transparent);
 }
 .markdown-body :deep(h2) {
-  margin: 16px 0 8px;
-  font-size: 18px;
-  border-bottom: 1px solid var(--n-border-color);
+  margin: 18px 0 10px;
+  font-size: 20px;
+  border-bottom: 1px solid var(--front-border);
   padding-bottom: 4px;
 }
 .markdown-body :deep(h3) {
-  margin: 12px 0 6px;
-  font-size: 16px;
+  margin: 14px 0 8px;
+  font-size: 17px;
 }
 .markdown-body :deep(ul) {
   padding-left: 20px;

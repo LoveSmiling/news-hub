@@ -29,3 +29,4 @@ pgvector==0.3.*
 
 # HTML parsing
 beautifulsoup4==4.12.*
+lxml==5.3.*
