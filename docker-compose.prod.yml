@@ -1,11 +1,14 @@
-# 生产部署覆盖文件
-# 用法: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+# 生产部署文件（可单独运行）
+# 用法: docker compose -f docker-compose.prod.yml up -d --build
 #
 # 需要在项目根目录创建 .env 文件:
 #   POSTGRES_USER=newshub
 #   POSTGRES_PASSWORD=<强密码>
 #   POSTGRES_DB=newshub
 #   FRONTEND_PORT=9080
+#   NEWSHUB_SUBNET=10.66.0.0/24
+#   PIP_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
+#   PIP_EXTRA_INDEX_URL=https://pypi.org/simple
 
 services:
   app:
@@ -14,22 +17,64 @@ services:
       args:
         PIP_INDEX_URL: ${PIP_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
         PIP_EXTRA_INDEX_URL: ${PIP_EXTRA_INDEX_URL:-https://pypi.org/simple}
-    volumes: []  # 不挂载源码，使用镜像内代码
+    container_name: newshub-app
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-newshub}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-newshub}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-newshub}:${POSTGRES_PASSWORD:-newshub123}@db:5432/${POSTGRES_DB:-newshub}
       - RSSHUB_URL=http://rsshub:1200
+    networks:
+      - newshub_net
 
   db:
-    ports: []  # 不对外暴露数据库端口
+    image: pgvector/pgvector:pg16
+    container_name: newshub-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-newshub}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-newshub123}
+      - POSTGRES_DB=${POSTGRES_DB:-newshub}
     volumes:
       - newshub-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-newshub}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - newshub_net
 
   rsshub:
-    ports: []  # 不对外暴露 RSSHub 端口
+    image: diygod/rsshub:chromium-bundled
+    container_name: newshub-rsshub
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - CACHE_TYPE=memory
+    networks:
+      - newshub_net
 
   frontend:
+    build: ./frontend
+    container_name: newshub-frontend
+    restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-9080}:80"
+    depends_on:
+      - app
+    networks:
+      - newshub_net
 
 volumes:
   newshub-pgdata:
+
+networks:
+  newshub_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${NEWSHUB_SUBNET:-10.66.0.0/24}
