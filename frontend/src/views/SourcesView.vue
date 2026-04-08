@@ -2,7 +2,11 @@
   <n-space vertical :size="16">
     <div style="display: flex; justify-content: space-between; align-items: center">
       <n-h2 style="margin: 0">源管理</n-h2>
-      <n-button type="primary" size="small" @click="openAddDialog">+ 新增源</n-button>
+      <n-space :size="8">
+        <n-button size="small" @click="handleExport">⬇ 导出</n-button>
+        <n-button size="small" @click="importDialogVisible = true">⬆ 导入</n-button>
+        <n-button type="primary" size="small" @click="openAddDialog">+ 新增源</n-button>
+      </n-space>
     </div>
 
     <!-- Filters -->
@@ -144,6 +148,59 @@
         </template>
       </n-card>
     </n-modal>
+
+    <!-- Import Dialog -->
+    <n-modal v-model:show="importDialogVisible" :mask-closable="false" style="width: 500px">
+      <n-card title="导入源" closable @close="closeImportDialog">
+        <n-space vertical :size="12">
+          <n-upload
+            accept=".json"
+            :max="1"
+            :default-upload="false"
+            @change="handleImportFileChange"
+          >
+            <n-button>选择 JSON 文件</n-button>
+          </n-upload>
+
+          <n-alert v-if="importPreview !== null && importError === ''" type="info">
+            即将导入 {{ importPreview }} 个源
+          </n-alert>
+          <n-alert v-if="importError" type="error">
+            {{ importError }}
+          </n-alert>
+
+          <div v-if="importResult">
+            <n-alert type="success">
+              导入完成：新增 {{ importResult.created }} 个，更新 {{ importResult.updated }} 个
+              <template v-if="importResult.errors.length > 0">
+                ，失败 {{ importResult.errors.length }} 个
+              </template>
+            </n-alert>
+            <div v-if="importResult.errors.length > 0" style="margin-top: 8px">
+              <n-text type="error" v-for="err in importResult.errors" :key="err.name" style="display: block; font-size: 13px">
+                {{ err.name }}: {{ err.error }}
+              </n-text>
+            </div>
+          </div>
+        </n-space>
+
+        <template #action>
+          <n-space justify="end">
+            <n-button size="small" @click="closeImportDialog">{{ importResult ? '关闭' : '取消' }}</n-button>
+            <n-button
+              v-if="!importResult"
+              size="small"
+              type="primary"
+              :disabled="!importPayload || !!importError"
+              :loading="importing"
+              @click="handleImport"
+            >
+              确认导入
+            </n-button>
+          </n-space>
+        </template>
+      </n-card>
+    </n-modal>
   </n-space>
 </template>
 
@@ -152,12 +209,15 @@ import { ref, computed, onMounted, h } from 'vue'
 import {
   NSpace, NH2, NButton, NCard, NDataTable, NSelect, NModal, NForm, NFormItem,
   NInput, NInputNumber, NRadioGroup, NRadio, NTag, NSpin, NText, NPopconfirm,
-  useMessage, type DataTableColumns, type FormInst, type FormRules,
+  NUpload, NAlert,
+  useMessage, type DataTableColumns, type FormInst, type FormRules, type UploadFileInfo,
 } from 'naive-ui'
 import {
   fetchSources, createSource, updateSource, deleteSource,
   testSource, collectSourceNow, fetchCategories, batchSourceAction,
+  exportSources, importSources,
   type SourceInfo, type SourceTestResult,
+  type SourceImportPayload, type SourceImportResult,
 } from '../api'
 
 const message = useMessage()
@@ -414,6 +474,70 @@ async function handleBatchCategory() {
   } catch (e: any) {
     message.error(e.response?.data?.detail || '操作失败')
   }
+}
+
+// --- Import / Export ---
+const importDialogVisible = ref(false)
+const importing = ref(false)
+const importPreview = ref<number | null>(null)
+const importError = ref('')
+const importPayload = ref<SourceImportPayload | null>(null)
+const importResult = ref<SourceImportResult | null>(null)
+
+async function handleExport() {
+  try {
+    await exportSources()
+    message.success('导出成功')
+  } catch (e: any) {
+    message.error(e.message || '导出失败')
+  }
+}
+
+function handleImportFileChange(options: { fileList: UploadFileInfo[] }) {
+  importError.value = ''
+  importPreview.value = null
+  importPayload.value = null
+  importResult.value = null
+
+  const fileInfo = options.fileList[0]
+  if (!fileInfo?.file) return
+
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const json = JSON.parse(e.target?.result as string)
+      if (!json.version || !Array.isArray(json.sources)) {
+        importError.value = '文件格式错误：缺少 version 或 sources 字段'
+        return
+      }
+      importPreview.value = json.sources.length
+      importPayload.value = json
+    } catch {
+      importError.value = '文件解析失败：不是有效的 JSON 文件'
+    }
+  }
+  reader.readAsText(fileInfo.file)
+}
+
+async function handleImport() {
+  if (!importPayload.value) return
+  importing.value = true
+  try {
+    importResult.value = await importSources(importPayload.value)
+    await loadData()
+  } catch (e: any) {
+    message.error(e.response?.data?.detail || '导入失败')
+  } finally {
+    importing.value = false
+  }
+}
+
+function closeImportDialog() {
+  importDialogVisible.value = false
+  importPreview.value = null
+  importError.value = ''
+  importPayload.value = null
+  importResult.value = null
 }
 
 onMounted(loadData)

@@ -356,6 +356,48 @@ export async function batchSourceAction(payload: BatchActionPayload): Promise<{ 
   return data
 }
 
+// ---- Source Import/Export ----
+
+export interface SourceImportItem {
+  name: string
+  display_name: string
+  category: string
+  type: string
+  route?: string
+  url?: string
+  schedule?: string
+  max_items?: number
+  status?: string
+}
+
+export interface SourceImportPayload {
+  version: number
+  sources: SourceImportItem[]
+}
+
+export interface SourceImportResult {
+  created: number
+  updated: number
+  errors: { name: string; error: string }[]
+}
+
+export async function exportSources(): Promise<void> {
+  const { data } = await api.get('/sources/export', { responseType: 'blob' })
+  const blob = new Blob([data], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+  a.href = url
+  a.download = `sources_export_${today}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+export async function importSources(payload: SourceImportPayload): Promise<SourceImportResult> {
+  const { data } = await api.post('/sources/import', payload)
+  return data
+}
+
 // ---- Briefing Share ----
 
 export interface ShareResponse {

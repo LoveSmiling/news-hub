@@ -93,6 +93,54 @@ class GroupedHotResponse(BaseModel):
     items: list[HotItemResponse]
 
 
+class SourceExportItem(BaseModel):
+    name: str
+    display_name: str
+    category: str
+    type: str
+    route: str
+    url: str
+    schedule: str
+    max_items: int
+    status: str
+
+    model_config = {"from_attributes": True}
+
+
+class SourceExportResponse(BaseModel):
+    version: int = 1
+    exported_at: str
+    sources: list[SourceExportItem]
+
+
+class SourceImportItem(BaseModel):
+    name: str = Field(..., min_length=1, max_length=50)
+    display_name: str = Field(..., min_length=1, max_length=100)
+    category: str = Field(..., min_length=1, max_length=50)
+    type: str = Field(default="rsshub", pattern=r"^(rsshub|rss)$")
+    route: str = Field(default="", max_length=200)
+    url: str = Field(default="", max_length=500)
+    schedule: str = Field(default="*/10 * * * *", max_length=50)
+    max_items: int = Field(default=30, ge=1, le=200)
+    status: str = Field(default="active", pattern=r"^(active|pending|disabled)$")
+
+
+class SourceImportRequest(BaseModel):
+    version: int = Field(..., ge=1)
+    sources: list[SourceImportItem]
+
+
+class SourceImportError(BaseModel):
+    name: str
+    error: str
+
+
+class SourceImportResponse(BaseModel):
+    created: int
+    updated: int
+    errors: list[SourceImportError]
+
+
 class SummaryResponse(BaseModel):
     id: int
     summary: str

@@ -1,7 +1,9 @@
 import time
 import logging
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +15,8 @@ from app.api.schemas import (
     SourceResponse, SourceCreate, SourceUpdate,
     SourceTestRequest, SourceTestResponse,
     BatchActionRequest,
+    SourceExportItem, SourceExportResponse,
+    SourceImportRequest, SourceImportResponse, SourceImportError,
 )
 from app.scheduler.jobs import register_source_job, remove_source_job
 from app.services.collector import collect_source, create_spider, _source_to_config
@@ -38,6 +42,27 @@ async def get_sources(db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Source).order_by(Source.category, Source.name))
     sources = result.scalars().all()
     return [SourceResponse.model_validate(s) for s in sources]
+
+
+@router.get("/export")
+async def export_sources(db: AsyncSession = Depends(get_db)):
+    """Export all sources as a downloadable JSON file."""
+    result = await db.execute(select(Source).order_by(Source.category, Source.name))
+    sources = result.scalars().all()
+
+    export_data = SourceExportResponse(
+        version=1,
+        exported_at=datetime.now(timezone.utc).isoformat(),
+        sources=[SourceExportItem.model_validate(s) for s in sources],
+    )
+
+    today = datetime.now(timezone.utc).strftime("%Y%m%d")
+    return JSONResponse(
+        content=export_data.model_dump(),
+        headers={
+            "Content-Disposition": f'attachment; filename="sources_export_{today}.json"',
+        },
+    )
 
 
 @router.get("/{source_id}", response_model=SourceResponse)
@@ -76,6 +101,62 @@ async def create_source(body: SourceCreate, db: AsyncSession = Depends(get_db)):
     register_source_job(source)
 
     return SourceResponse.model_validate(source)
+
+
+@router.post("/import", response_model=SourceImportResponse)
+async def import_sources(body: SourceImportRequest, db: AsyncSession = Depends(get_db)):
+    """Import sources from JSON: update existing (by name) or create new."""
+    created = 0
+    updated = 0
+    errors: list[SourceImportError] = []
+
+    for item in body.sources:
+        try:
+            result = await db.execute(select(Source).where(Source.name == item.name))
+            existing = result.scalar_one_or_none()
+
+            if existing:
+                old_schedule = existing.schedule
+                old_status = existing.status
+                existing.display_name = item.display_name
+                existing.category = item.category
+                existing.type = item.type
+                existing.route = item.route
+                existing.url = item.url
+                existing.schedule = item.schedule
+                existing.max_items = item.max_items
+                existing.status = item.status
+                updated += 1
+
+                # Sync scheduler if schedule or status changed
+                if item.status == "disabled":
+                    remove_source_job(existing.name)
+                elif old_schedule != item.schedule or old_status != item.status:
+                    register_source_job(existing)
+            else:
+                source = Source(
+                    name=item.name,
+                    display_name=item.display_name,
+                    category=item.category,
+                    type=item.type,
+                    route=item.route,
+                    url=item.url,
+                    schedule=item.schedule,
+                    max_items=item.max_items,
+                    status=item.status,
+                )
+                db.add(source)
+                created += 1
+
+                # Register scheduler for new active sources
+                if item.status == "active":
+                    await db.flush()
+                    register_source_job(source)
+        except Exception as e:
+            errors.append(SourceImportError(name=item.name, error=str(e)))
+
+    await db.commit()
+    return SourceImportResponse(created=created, updated=updated, errors=errors)
 
 
 @router.put("/{source_id}", response_model=SourceResponse)
