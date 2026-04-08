@@ -117,12 +117,12 @@ class SourceImportItem(BaseModel):
     name: str = Field(..., min_length=1, max_length=50)
     display_name: str = Field(..., min_length=1, max_length=100)
     category: str = Field(..., min_length=1, max_length=50)
-    type: str = Field(default="rsshub", pattern=r"^(rsshub|rss)$")
+    type: str = Field(default="rsshub", pattern=r"^(rsshub|rss|custom)$")
     route: str = Field(default="", max_length=200)
     url: str = Field(default="", max_length=500)
     schedule: str = Field(default="*/10 * * * *", max_length=50)
     max_items: int = Field(default=30, ge=1, le=200)
-    status: str = Field(default="active", pattern=r"^(active|pending|disabled)$")
+    status: str = Field(default="active", pattern=r"^(active|pending|disabled|error)$")
 
 
 class SourceImportRequest(BaseModel):
